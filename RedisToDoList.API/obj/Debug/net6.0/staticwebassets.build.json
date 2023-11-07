@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "xieuyOSr5phqGwP8zsFYvDQazdJSIMfU3RTc2me0ue4=",
+  "Source": "RedisToDoList.API",
+  "BasePath": "_content/RedisToDoList.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
