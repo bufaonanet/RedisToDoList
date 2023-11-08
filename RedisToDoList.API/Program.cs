@@ -7,7 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddDbContext<ToDoListDbContext>(o => 
         o.UseInMemoryDatabase("ToDoListDb"));
     
-    builder.Services.AddScoped<ICachingService, CachingService>();
+    //builder.Services.AddScoped<ICachingService, CachingServiceWithDistributedCache>();
+    builder.Services.AddScoped<ICachingService, CachingServiceWithStackExchange>();
     
     builder.Services.AddStackExchangeRedisCache(options =>
     {

@@ -21,16 +21,12 @@ public class ToDosController : ControllerBase
         _cache = cache;
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var todoCache = await _cache.GetAsync(id.ToString());
-        ToDo? todo;
-
-        if (!string.IsNullOrWhiteSpace(todoCache))
+        var todo = await _cache.GetAsync<ToDo>(id.ToString());
+        if (todo is not null)
         {
-            todo = JsonSerializer.Deserialize<ToDo>(todoCache);
-
             Console.WriteLine("Loaded from cache.");
 
             return Ok(todo);
@@ -41,7 +37,7 @@ public class ToDosController : ControllerBase
         if (todo == null)
             return NotFound();
 
-        await _cache.SetAsync(id.ToString(), JsonSerializer.Serialize(todo));
+        await _cache.SetAsync(id.ToString(), todo);
 
         return Ok(todo);
     }
@@ -54,6 +50,44 @@ public class ToDosController : ControllerBase
         await _context.ToDos.AddAsync(todo);
         await _context.SaveChangesAsync();
 
+        await _cache.SetAsync(todo.Id.ToString(), todo);
+
         return CreatedAtAction(nameof(GetById), new { id = todo.Id }, model);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Put(int id, ToDoInputModel model)
+    {
+        var todo = await _context.ToDos.FindAsync(id);
+        if (todo == null)
+        {
+            return NotFound();
+        }
+
+        todo.UpdateTitle(model.Title)
+            .UpdateDescription(model.Description);
+
+        await _context.SaveChangesAsync();
+        
+        await _cache.RemoveAsync(id.ToString());
+
+        return Ok(todo);
+    }
+    
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var todo = await _context.ToDos.FindAsync(id);
+        if (todo == null)
+        {
+            return NotFound();
+        }
+
+        _context.ToDos.Remove(todo);
+        await _context.SaveChangesAsync();
+        
+        await _cache.RemoveAsync(id.ToString());
+
+        return NoContent();
     }
 }
